@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<nav class="mb-3" style="font-size:.85rem">
+<a href="{% url 'store:index' %}" style="color:var(--p);text-decoration:none">Home</a>
+{% if product.category %} / <a href="{{ product.category.get_absolute_url }}" style="color:var(--p);text-decoration:none">{{ product.category.name }}</a>{% endif %}
+ / <span style="color:var(--muted)">{{ product.name|truncatechars:40 }}</span>
+</nav>
+
+<div class="row g-4">
+<div class="col-md-5">
+<div style="border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr);aspect-ratio:1;background:var(--bg);display:flex;align-items:center;justify-content:center">
+{% if product.main_image %}
+<img src="{{ product.main_image.image.url }}" id="mainImg" style="width:100%;height:100%;object-fit:cover">
+{% else %}<div style="font-size:5rem">📦</div>{% endif %}
+</div>
+{% if product.images.all|length > 1 %}
+<div class="d-flex gap-2 mt-2 overflow-auto">
+{% for img in product.images.all %}
+<div style="width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid {% if img.is_primary %}var(--p){% else %}var(--bdr){% endif %};cursor:pointer;flex-shrink:0" onclick="document.getElementById('mainImg').src='{{ img.image.url }}'">
+<img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover">
+</div>
+{% endfor %}
+</div>
+{% endif %}
+</div>
+
+<div class="col-md-7">
+{% if product.brand %}<div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;font-weight:600">{{ product.brand.name }}</div>{% endif %}
+<h1 style="font-size:1.6rem;font-weight:800;margin-top:.2rem">{{ product.name }}</h1>
+<div class="d-flex align-items-center gap-2 mt-2 mb-2">
+<div style="color:#f1c40f">{% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+<span style="font-size:.83rem;color:var(--muted)">{{ product.avg_rating }}/5 ({{ product.review_count }} reviews)</span>
+<span style="color:var(--bdr)">|</span>
+<span style="font-size:.83rem;color:var(--muted)">{{ product.sales_count }} sold</span>
+</div>
+<div class="d-flex align-items-baseline gap-3 mb-3">
+<span style="font-size:1.9rem;font-weight:800;color:var(--p)">₹{{ product.price }}</span>
+{% if product.compare_price %}<span style="color:var(--muted);text-decoration:line-through">₹{{ product.compare_price }}</span>
+<span style="background:var(--ac);color:#fff;border-radius:50px;padding:2px 9px;font-size:.8rem;font-weight:700">{{ product.discount_percent }}% OFF</span>{% endif %}
+</div>
+{% if product.predicted_discount > 0 %}
+<div style="background:rgba(108,62,244,.08);border:1px solid rgba(108,62,244,.2);border-radius:10px;padding:.7rem 1rem;margin-bottom:1rem;font-size:.83rem">
+🤖 <strong>AI Insight:</strong> May see a <strong>{{ product.predicted_discount }}% discount</strong> soon based on demand patterns.
+</div>
+{% endif %}
+{% if product.short_description %}<p style="color:var(--muted);margin-bottom:1.1rem">{{ product.short_description }}</p>{% endif %}
+<div class="mb-3">
+{% if product.is_in_stock %}
+{% if product.is_low_stock %}<span style="color:#e67e22;font-weight:600"><i class="bi bi-exclamation-triangle me-1"></i>Only {{ product.stock }} left!</span>
+{% else %}<span style="color:var(--ok);font-weight:600"><i class="bi bi-check-circle me-1"></i>In Stock ({{ product.stock }})</span>{% endif %}
+{% else %}<span style="color:#e74c3c;font-weight:600"><i class="bi bi-x-circle me-1"></i>Out of Stock</span>{% endif %}
+</div>
+<div class="d-flex align-items-center gap-3 mb-3">
+<div style="display:flex;align-items:center;border:1px solid var(--bdr);border-radius:50px;overflow:hidden">
+<button onclick="chQty(-1)" style="width:34px;height:34px;border:none;background:var(--bg);color:var(--tx);font-size:1rem;cursor:pointer">−</button>
+<input type="number" id="qty" value="1" min="1" max="{{ product.stock }}" style="width:46px;text-align:center;border:none;background:transparent;color:var(--tx);font-weight:700">
+<button onclick="chQty(1)" style="width:34px;height:34px;border:none;background:var(--bg);color:var(--tx);font-size:1rem;cursor:pointer">+</button>
+</div>
+<button onclick="addToCart({{ product.id }}, document.getElementById('qty').value)" class="btn-pri btn flex-grow-1" {% if not product.is_in_stock %}disabled{% endif %}><i class="bi bi-bag-plus me-1"></i>Add to Cart</button>
+{% if user.is_authenticated %}<button class="wish-btn" style="position:static;width:40px;height:40px;border:1px solid var(--bdr)" onclick="toggleWish({{ product.id }}, this)"><i class="bi bi-heart"></i></button>{% endif %}
+</div>
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:.9rem;font-size:.83rem">
+<div class="mb-1"><i class="bi bi-truck me-2" style="color:var(--p)"></i><strong>Free Delivery</strong> on orders ₹499+</div>
+<div class="mb-1"><i class="bi bi-arrow-clockwise me-2" style="color:var(--ok)"></i><strong>7-day</strong> easy returns</div>
+<div><i class="bi bi-shield-check me-2" style="color:#f39c12"></i><strong>Secure</strong> payments</div>
+</div>
+</div>
+</div>
+
+<div class="mt-5">
+<ul class="nav nav-tabs">
+<li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">Description</button></li>
+<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#revs">Reviews ({{ product.review_count }})</button></li>
+</ul>
+<div class="tab-content p-4" style="background:var(--sur);border:1px solid var(--bdr);border-top:none;border-radius:0 0 var(--r) var(--r)">
+<div class="tab-pane fade show active" id="desc"><div style="line-height:1.8">{{ product.description|linebreaks }}</div></div>
+<div class="tab-pane fade" id="revs">
+{% if user.is_authenticated %}
+<form method="POST" action="{% url 'reviews:add' product.slug %}" enctype="multipart/form-data" class="mb-4">
+{% csrf_token %}
+<h5 class="mb-3">Write a Review</h5>
+<div class="mb-2"><div class="d-flex gap-2">{% for i in "12345" %}<label style="font-size:1.4rem;color:#f1c40f;cursor:pointer"><input type="radio" name="rating" value="{{ forloop.counter }}" style="display:none" required>★</label>{% endfor %}</div></div>
+<input type="text" name="title" placeholder="Review title" required class="fc w-100 mb-2">
+<textarea name="body" rows="3" placeholder="Share your experience…" required class="fc w-100" style="resize:none"></textarea>
+<div class="mt-2"><label style="font-size:.83rem;font-weight:600">Photos (optional)</label><input type="file" name="images" multiple accept="image/*" class="form-control mt-1"></div>
+<button type="submit" class="btn-pri btn mt-3">Submit Review</button>
+</form>
+<hr>
+{% endif %}
+{% for review in reviews %}
+<div class="mb-4 pb-3" style="border-bottom:1px solid var(--bdr)">
+<div class="d-flex justify-content-between"><strong>{{ review.user.full_name }}</strong>{% if review.is_verified_purchase %}<span style="background:var(--ok);color:#fff;border-radius:50px;padding:1px 8px;font-size:.7rem">✓ Verified</span>{% endif %}<span style="font-size:.78rem;color:var(--muted)">{{ review.created_at|date:"d M Y" }}</span></div>
+<div style="color:#f1c40f">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+<div style="font-weight:600">{{ review.title }}</div>
+<div style="font-size:.88rem;color:var(--muted)">{{ review.body }}</div>
+{% if review.images.all %}<div class="d-flex gap-2 mt-2">{% for ri in review.images.all %}<img src="{{ ri.image.url }}" style="width:60px;height:60px;object-fit:cover;border-radius:8px">{% endfor %}</div>{% endif %}
+{% if user == review.user %}<a href="{% url 'reviews:delete' review.pk %}" style="font-size:.76rem;color:#e74c3c" onclick="return confirm('Delete?')">Delete</a>{% endif %}
+</div>
+{% empty %}<div style="text-align:center;color:var(--muted);padding:2rem">No reviews yet. Be the first!</div>
+{% endfor %}
+</div>
+</div>
+</div>
+
+{% if also_bought %}<section class="mt-5"><h3 class="sec-title mb-3">Customers Also Bought</h3><div class="row row-cols-2 row-cols-md-4 g-3">{% for product in also_bought %}{% include 'partials/product_card.html' %}{% endfor %}</div></section>{% endif %}
+{% if similar_products %}<section class="mt-5 mb-5"><h3 class="sec-title mb-3">Similar Products</h3><div class="row row-cols-2 row-cols-md-4 g-3">{% for product in similar_products %}{% include 'partials/product_card.html' %}{% endfor %}</div></section>{% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function chQty(d){const i=document.getElementById('qty');const v=parseInt(i.value)+d;if(v>=1 && v<={{ product.stock }})i.value=v;}
+</script>
+{% endblock %}

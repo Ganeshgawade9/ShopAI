@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}My Cart — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<h2 class="mb-4">My Cart <span style="color:var(--muted);font-size:1rem">({{ cart.item_count }} items)</span></h2>
+{% if cart.items.all %}
+<div class="row g-3">
+<div class="col-md-8">
+{% for item in cart.items.all %}
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.1rem;margin-bottom:.9rem;display:flex;gap:1rem;align-items:center">
+<div style="width:75px;height:75px;border-radius:10px;overflow:hidden;background:var(--bg);flex-shrink:0">
+{% if item.product.main_image %}<img src="{{ item.product.main_image.image.url }}" style="width:100%;height:100%;object-fit:cover">{% else %}<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.8rem">📦</div>{% endif %}
+</div>
+<div style="flex:1">
+<a href="{{ item.product.get_absolute_url }}" style="font-weight:700;color:var(--tx);text-decoration:none;font-size:.92rem">{{ item.product.name }}</a>
+<div style="color:var(--p);font-weight:700;margin-top:.2rem">₹{{ item.price }}</div>
+</div>
+<form method="POST" action="{% url 'cart:update' item.id %}" style="display:flex;align-items:center;border:1px solid var(--bdr);border-radius:50px;overflow:hidden">{% csrf_token %}
+<button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" style="width:30px;height:30px;border:none;background:var(--bg);color:var(--tx);cursor:pointer">−</button>
+<span style="padding:0 .5rem;font-weight:700;font-size:.88rem">{{ item.quantity }}</span>
+<button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" style="width:30px;height:30px;border:none;background:var(--bg);color:var(--tx);cursor:pointer">+</button>
+</form>
+<span style="font-weight:700;min-width:65px;text-align:right">₹{{ item.subtotal }}</span>
+<a href="{% url 'cart:remove' item.id %}" style="color:#e74c3c;font-size:1.05rem"><i class="bi bi-trash"></i></a>
+</div>
+{% endfor %}
+</div>
+<div class="col-md-4">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem;position:sticky;top:80px">
+<h5 class="mb-3">Order Summary</h5>
+<div class="d-flex justify-content-between mb-2"><span style="color:var(--muted)">Subtotal</span><strong>₹{{ cart.total }}</strong></div>
+<div class="d-flex justify-content-between mb-2"><span style="color:var(--muted)">Shipping</span><span style="color:var(--ok)">{% if cart.total >= 499 %}FREE{% else %}₹49{% endif %}</span></div>
+<hr>
+<div class="d-flex justify-content-between mb-3"><strong>Total</strong><strong style="color:var(--p);font-size:1.1rem">₹{{ cart.total }}</strong></div>
+<a href="{% url 'orders:checkout' %}" class="btn-pri btn w-100 text-center">Proceed to Checkout →</a>
+</div>
+</div>
+</div>
+{% else %}
+<div style="text-align:center;padding:4rem 2rem">
+<div style="font-size:5rem;margin-bottom:1rem">🛒</div>
+<h4>Your cart is empty</h4><p style="color:var(--muted)">Add some amazing products!</p>
+<a href="{% url 'store:product_list' %}" class="btn-pri btn mt-2">Start Shopping</a>
+</div>
+{% endif %}
+</div>
+{% endblock %}

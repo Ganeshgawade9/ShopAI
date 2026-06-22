@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Vendor Dashboard — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div><h2 style="font-weight:800">{{ vendor.business_name }}</h2>
+<span style="padding:3px 11px;border-radius:50px;font-size:.78rem;font-weight:700;background:{% if vendor.status == 'approved' %}rgba(46,204,113,.15);color:#2ecc71{% else %}rgba(243,156,18,.15);color:#f39c12{% endif %}">{{ vendor.get_status_display }}</span></div>
+<a href="/admin/store/product/add/" class="btn-pri btn btn-sm"><i class="bi bi-plus me-1"></i>Add Product</a>
+</div>
+<div class="row g-3 mb-4">
+<div class="col-6 col-md-3"><div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem;text-align:center"><div style="font-size:1.8rem;color:var(--p);font-weight:800">{{ total_products }}</div><div style="font-size:.83rem;color:var(--muted)">Total Products</div></div></div>
+<div class="col-6 col-md-3"><div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem;text-align:center"><div style="font-size:1.8rem;color:#2ecc71;font-weight:800">{{ total_orders }}</div><div style="font-size:.83rem;color:var(--muted)">Total Orders</div></div></div>
+<div class="col-6 col-md-3"><div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem;text-align:center"><div style="font-size:1.8rem;color:#f39c12;font-weight:800">₹{{ vendor.total_sales|floatformat:0 }}</div><div style="font-size:.83rem;color:var(--muted)">Total Revenue</div></div></div>
+<div class="col-6 col-md-3"><div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem;text-align:center"><div style="font-size:1.8rem;color:var(--p);font-weight:800">{{ vendor.commission_rate }}%</div><div style="font-size:.83rem;color:var(--muted)">Commission</div></div></div>
+</div>
+<h5 class="mb-3">Your Products</h5>
+<div class="row row-cols-2 row-cols-md-4 g-3">
+{% for product in products %}{% include 'partials/product_card.html' %}{% endfor %}
+{% if not products %}<div class="col-12" style="text-align:center;padding:2rem;color:var(--muted)">No products yet. <a href="/admin/store/product/add/" style="color:var(--p)">Add your first product</a></div>{% endif %}
+</div>
+</div>
+{% endblock %}

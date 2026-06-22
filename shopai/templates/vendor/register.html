@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Become a Vendor — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-5" style="max-width:500px">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:2.3rem">
+<h2 style="font-weight:800;margin-bottom:.4rem">Sell on ShopAI</h2>
+<p style="color:var(--muted);margin-bottom:1.8rem">Join thousands of vendors and grow your business</p>
+<form method="POST">{% csrf_token %}
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Business Name</label><input name="business_name" required class="fc w-100 mt-1"></div>
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Phone</label><input name="phone" required class="fc w-100 mt-1"></div>
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Business Email</label><input name="email" type="email" required class="fc w-100 mt-1"></div>
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Address</label><textarea name="address" rows="2" required class="fc w-100 mt-1" style="resize:none"></textarea></div>
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">GST Number (Optional)</label><input name="gst_number" class="fc w-100 mt-1"></div>
+<button type="submit" class="btn-pri btn w-100">Register as Vendor</button>
+</form>
+</div>
+</div>
+{% endblock %}

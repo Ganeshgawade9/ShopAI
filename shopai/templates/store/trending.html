@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Trending — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<h2 class="mb-4">🔥 Trending Products</h2>
+<div class="row row-cols-2 row-cols-md-4 g-3">
+{% for product in products %}{% include 'partials/product_card.html' %}{% endfor %}
+{% if not products %}<div class="col-12" style="text-align:center;padding:3rem;color:var(--muted)">No trending products yet.</div>{% endif %}
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Add Address — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width:500px">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.8rem">
+<h3 class="mb-3">Add New Address</h3>
+<form method="POST">{% csrf_token %}{{ form.as_p }}<button type="submit" class="btn-pri btn w-100 mt-2">Save Address</button></form>
+</div>
+</div>
+{% endblock %}

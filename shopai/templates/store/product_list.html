@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{% if query %}Search: {{ query }}{% else %}All Products{% endif %} — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<div class="row">
+<div class="col-md-3 d-none d-md-block">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem;position:sticky;top:80px">
+<h5 style="font-weight:700;margin-bottom:1.2rem"><i class="bi bi-funnel me-2" style="color:var(--p)"></i>Filters</h5>
+<form method="GET" id="ff">
+{% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+<div class="mb-3">
+<div style="font-weight:700;font-size:.8rem;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem">Category</div>
+{% for cat in categories %}
+<div class="form-check mb-1">
+<input class="form-check-input" type="radio" name="category" value="{{ cat.slug }}" id="c{{ cat.id }}" {% if sel_cat == cat.slug %}checked{% endif %} onchange="document.getElementById('ff').submit()">
+<label class="form-check-label" for="c{{ cat.id }}" style="font-size:.85rem;cursor:pointer">{{ cat.name }}</label>
+</div>
+{% endfor %}
+</div>
+<div class="mb-3">
+<div style="font-weight:700;font-size:.8rem;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem">Price Range</div>
+<div class="d-flex gap-2 align-items-center">
+<input type="number" name="min_price" placeholder="Min" value="{{ sel_min }}" class="fc" style="width:75px;font-size:.82rem">
+<span style="color:var(--muted)">—</span>
+<input type="number" name="max_price" placeholder="Max" value="{{ sel_max }}" class="fc" style="width:75px;font-size:.82rem">
+</div>
+</div>
+<div class="mb-3">
+<div style="font-weight:700;font-size:.8rem;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem">Brand</div>
+{% for brand in brands %}
+<div class="form-check mb-1">
+<input class="form-check-input" type="radio" name="brand" value="{{ brand.id }}" id="b{{ brand.id }}" {% if sel_brand == brand.id|stringformat:"s" %}checked{% endif %} onchange="document.getElementById('ff').submit()">
+<label class="form-check-label" for="b{{ brand.id }}" style="font-size:.85rem;cursor:pointer">{{ brand.name }}</label>
+</div>
+{% endfor %}
+</div>
+<div class="mb-3">
+<div style="font-weight:700;font-size:.8rem;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem">Min Rating</div>
+{% for r in "4321" %}
+<div class="form-check mb-1">
+<input class="form-check-input" type="radio" name="rating" value="{{ r }}" id="r{{ r }}" {% if sel_rating == r %}checked{% endif %} onchange="document.getElementById('ff').submit()">
+<label class="form-check-label" for="r{{ r }}" style="font-size:.85rem;cursor:pointer;color:#f1c40f">{{ r }}★ & up</label>
+</div>
+{% endfor %}
+</div>
+<div class="mb-3">
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="in_stock" value="1" id="instk" {% if sel_stock %}checked{% endif %} onchange="document.getElementById('ff').submit()">
+<label class="form-check-label" for="instk" style="font-size:.85rem;cursor:pointer">In Stock Only</label>
+</div>
+</div>
+<button type="submit" class="btn-pri btn w-100 btn-sm">Apply Filters</button>
+<a href="{% url 'store:product_list' %}" class="btn-out btn w-100 btn-sm mt-2 text-center">Clear All</a>
+</form>
+</div>
+</div>
+
+<div class="col-md-9">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+<div>
+<h4>{% if query %}Results for "{{ query }}"{% else %}All Products{% endif %}</h4>
+<span style="font-size:.83rem;color:var(--muted)">{{ total }} products found</span>
+</div>
+<select onchange="location.href='?sort='+this.value" class="fc" style="font-size:.85rem">
+<option value="newest" {% if sel_sort == 'newest' %}selected{% endif %}>Newest</option>
+<option value="popular" {% if sel_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+<option value="price_asc" {% if sel_sort == 'price_asc' %}selected{% endif %}>Price: Low→High</option>
+<option value="price_desc" {% if sel_sort == 'price_desc' %}selected{% endif %}>Price: High→Low</option>
+<option value="rating" {% if sel_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+</select>
+</div>
+
+{% if products %}
+<div class="row row-cols-2 row-cols-md-3 g-3">{% for product in products %}{% include 'partials/product_card.html' %}{% endfor %}</div>
+{% if products.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center">
+<ul class="pagination">
+{% if products.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">‹</a></li>{% endif %}
+{% for num in products.paginator.page_range %}<li class="page-item {% if num == products.number %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+{% if products.has_next %}<li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">›</a></li>{% endif %}
+</ul>
+</nav>
+{% endif %}
+{% else %}
+<div style="text-align:center;padding:4rem 2rem">
+<div style="font-size:4rem">🔍</div>
+<h4 class="mt-3">No products found</h4>
+<p style="color:var(--muted)">Try adjusting your filters or search query.</p>
+<a href="{% url 'store:product_list' %}" class="btn-pri btn mt-2">Browse All</a>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

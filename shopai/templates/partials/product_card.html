@@ -1,0 +1,47 @@
+<div class="col fiu">
+  <div class="p-card">
+    <div class="p-img">
+      <a href="{{ product.get_absolute_url }}">
+        {% if product.main_image %}
+          <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" loading="lazy">
+        {% else %}
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:3rem;background:var(--bg)">📦</div>
+        {% endif %}
+      </a>
+      {% if product.discount_percent > 0 %}
+        <span class="p-badge b-sale">-{{ product.discount_percent }}%</span>
+      {% elif product.is_trending %}
+        <span class="p-badge b-hot">Trending</span>
+      {% else %}
+        <span class="p-badge b-new">New</span>
+      {% endif %}
+      {% if user.is_authenticated %}
+      <button class="wish-btn" onclick="toggleWish({{ product.id }}, this)"><i class="bi bi-heart"></i></button>
+      {% endif %}
+    </div>
+    <div class="p-body">
+      {% if product.brand %}<div class="p-brand">{{ product.brand.name }}</div>{% endif %}
+      <a href="{{ product.get_absolute_url }}" style="text-decoration:none"><div class="p-name">{{ product.name }}</div></a>
+      {% if product.review_count > 0 %}
+      <div class="stars mb-1">
+        {% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
+        <span style="font-size:.7rem;color:var(--muted);margin-left:3px">({{ product.review_count }})</span>
+      </div>
+      {% endif %}
+      <div class="d-flex align-items-center gap-2">
+        <span class="p-price">₹{{ product.price }}</span>
+        {% if product.compare_price %}<span class="p-compare">₹{{ product.compare_price }}</span>{% endif %}
+      </div>
+      {% if product.is_low_stock %}
+        <div style="font-size:.7rem;color:#e67e22;font-weight:600;margin-top:.2rem"><i class="bi bi-exclamation-circle me-1"></i>Only {{ product.stock }} left!</div>
+      {% elif not product.is_in_stock %}
+        <div style="font-size:.7rem;color:#e74c3c;font-weight:600;margin-top:.2rem"><i class="bi bi-x-circle me-1"></i>Out of Stock</div>
+      {% endif %}
+      {% if product.is_in_stock %}
+      <button class="btn-cart" onclick="addToCart({{ product.id }})"><i class="bi bi-bag-plus me-1"></i>Add to Cart</button>
+      {% else %}
+      <button class="btn-cart" disabled style="opacity:.5;cursor:not-allowed">Out of Stock</button>
+      {% endif %}
+    </div>
+  </div>
+</div>

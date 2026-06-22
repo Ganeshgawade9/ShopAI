@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<h2 class="mb-4">Checkout</h2>
+<form method="POST" action="{% url 'orders:place_order' %}">{% csrf_token %}
+<div class="row g-4">
+<div class="col-md-7">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem;margin-bottom:1rem">
+<h5 class="mb-3"><i class="bi bi-geo-alt me-2" style="color:var(--p)"></i>Delivery Address</h5>
+{% if addresses %}
+{% for addr in addresses %}
+<label style="display:block;border:2px solid {% if addr == default_addr %}var(--p){% else %}var(--bdr){% endif %};border-radius:12px;padding:.9rem;margin-bottom:.7rem;cursor:pointer">
+<input type="radio" name="address_id" value="{{ addr.id }}" {% if addr == default_addr %}checked{% endif %} style="margin-right:.5rem">
+<strong>{{ addr.full_name }}</strong> <span style="font-size:.78rem;color:var(--muted)">({{ addr.get_address_type_display }})</span><br>
+<span style="font-size:.85rem;color:var(--muted)">{{ addr.address_line1 }}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</span><br>
+<span style="font-size:.83rem;color:var(--muted)"><i class="bi bi-phone me-1"></i>{{ addr.phone }}</span>
+</label>
+{% endfor %}
+{% else %}
+<p style="color:var(--muted)">No addresses saved. <a href="{% url 'users:add_address' %}" style="color:var(--p)">Add Address</a></p>
+{% endif %}
+<a href="{% url 'users:add_address' %}" style="font-size:.83rem;color:var(--p);text-decoration:none"><i class="bi bi-plus-circle me-1"></i>Add New Address</a>
+</div>
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem">
+<h5 class="mb-3"><i class="bi bi-credit-card me-2" style="color:var(--p)"></i>Payment Method</h5>
+<label style="display:flex;align-items:center;gap:.7rem;border:2px solid var(--bdr);border-radius:12px;padding:.8rem 1rem;margin-bottom:.7rem;cursor:pointer">
+<input type="radio" name="payment_method" value="razorpay"><span style="font-size:1.2rem">💳</span><span style="font-weight:600;font-size:.88rem">Razorpay (UPI/Cards/NetBanking)</span></label>
+<label style="display:flex;align-items:center;gap:.7rem;border:2px solid var(--bdr);border-radius:12px;padding:.8rem 1rem;margin-bottom:.7rem;cursor:pointer">
+<input type="radio" name="payment_method" value="stripe"><span style="font-size:1.2rem">🌐</span><span style="font-weight:600;font-size:.88rem">Stripe (International Cards)</span></label>
+<label style="display:flex;align-items:center;gap:.7rem;border:2px solid var(--p);border-radius:12px;padding:.8rem 1rem;cursor:pointer">
+<input type="radio" name="payment_method" value="cod" checked><span style="font-size:1.2rem">💵</span><span style="font-weight:600;font-size:.88rem">Cash on Delivery</span></label>
+</div>
+</div>
+<div class="col-md-5">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem;position:sticky;top:80px">
+<h5 class="mb-3">Order Summary</h5>
+{% for item in cart.items.all %}
+<div style="display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.85rem"><span style="color:var(--muted)">{{ item.product.name|truncatechars:25 }} × {{ item.quantity }}</span><span style="font-weight:600">₹{{ item.subtotal }}</span></div>
+{% endfor %}
+<hr>
+<div class="d-flex justify-content-between mb-2" style="font-size:.85rem"><span style="color:var(--muted)">Subtotal</span><span>₹{{ cart.total }}</span></div>
+<div class="d-flex justify-content-between mb-3" style="font-size:.85rem"><span style="color:var(--muted)">Shipping</span><span style="color:var(--ok)">{% if cart.total >= 499 %}FREE{% else %}₹49{% endif %}</span></div>
+<hr>
+<div class="d-flex justify-content-between mb-3"><strong>Total (incl. GST)</strong><strong style="color:var(--p);font-size:1.05rem">~₹{{ cart.total }}</strong></div>
+<button type="submit" class="btn-pri btn w-100">Place Order →</button>
+<p style="font-size:.73rem;color:var(--muted);text-align:center;margin-top:.7rem"><i class="bi bi-shield-check me-1"></i>Secure SSL encrypted checkout</p>
+</div>
+</div>
+</div>
+</form>
+</div>
+{% endblock %}

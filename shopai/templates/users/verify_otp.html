@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Verify OTP — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-5" style="max-width:380px">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:2.3rem;text-align:center">
+<div style="font-size:3rem;margin-bottom:.8rem">📧</div>
+<h3 style="font-weight:800">Verify Your Email</h3>
+<p style="color:var(--muted);font-size:.85rem;margin-bottom:1.8rem">Enter the 6-digit OTP sent to <strong>{{ user_obj.email }}</strong><br><small>(Check server console — dev mode)</small></p>
+<form method="POST">{% csrf_token %}{{ form.code }}<br><button type="submit" class="btn-pri btn mt-3 w-100">Verify OTP</button></form>
+</div>
+</div>
+{% endblock %}

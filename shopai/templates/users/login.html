@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Login — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-5" style="max-width:400px">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:2.3rem">
+<h2 style="font-weight:800;text-align:center;margin-bottom:.2rem">Welcome Back</h2>
+<p style="text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:1.8rem">Sign in to your ShopAI account</p>
+<form method="POST">{% csrf_token %}
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Email</label>{{ form.email }}</div>
+<div class="mb-3"><label style="font-size:.83rem;font-weight:600">Password</label>{{ form.password }}</div>
+<button type="submit" class="btn-pri btn w-100">Sign In</button>
+</form>
+<p style="text-align:center;margin-top:1.3rem;font-size:.85rem;color:var(--muted)">Don't have an account? <a href="{% url 'users:register' %}" style="color:var(--p);font-weight:600">Sign Up</a></p>
+</div>
+</div>
+{% endblock %}

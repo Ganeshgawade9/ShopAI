@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ request.user.dark_mode|yesno:'dark,light' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}ShopAI{% endblock %}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--p:#6c3ef4;--pd:#5129d9;--ac:#ff6b35;--ok:#2ecc71;--bg:#f8f7ff;--sur:#ffffff;--bdr:#e8e4f0;--tx:#1a1228;--muted:#7b6fa0;--shd:0 4px 24px rgba(108,62,244,.08);--r:16px;--tr:all .25s cubic-bezier(.4,0,.2,1)}
+[data-theme=dark]{--bg:#0f0c1a;--sur:#1e1930;--bdr:#2d2545;--tx:#f0ecff;--muted:#9b91c1;--shd:0 4px 24px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);transition:background .3s,color .3s}
+h1,h2,h3,h4,h5,h6{font-family:'Syne',sans-serif}
+/* Navbar */
+.nav-bar{background:var(--sur);border-bottom:1px solid var(--bdr);box-shadow:var(--shd);padding:.7rem 0;position:sticky;top:0;z-index:1000}
+.brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;background:linear-gradient(135deg,var(--p),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.search-wrap{position:relative;flex:1}
+.search-wrap input{width:100%;border:2px solid var(--bdr);border-radius:50px;background:var(--bg);color:var(--tx);padding:.5rem 1.2rem;font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.search-wrap input:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(108,62,244,.15)}
+.suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sur);border:1px solid var(--bdr);border-radius:12px;box-shadow:0 12px 40px rgba(108,62,244,.15);z-index:9999;display:none;max-height:320px;overflow-y:auto}
+.sug-item{padding:.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.6rem;font-size:.88rem;transition:var(--tr)}
+.sug-item:hover{background:var(--bg)}
+.nav-btn{color:var(--tx);text-decoration:none;font-size:1.25rem;padding:.35rem .55rem;border-radius:10px;position:relative;transition:var(--tr)}
+.nav-btn:hover{background:var(--bg);color:var(--p)}
+.badge-c{position:absolute;top:-4px;right:-4px;background:var(--ac);color:#fff;font-size:.62rem;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+/* Cards */
+.p-card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:var(--tr);height:100%}
+.p-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(108,62,244,.18);border-color:var(--p)}
+.p-img{overflow:hidden;aspect-ratio:1;background:var(--bg);position:relative}
+.p-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.p-card:hover .p-img img{transform:scale(1.08)}
+.p-badge{position:absolute;top:10px;left:10px;padding:2px 9px;border-radius:50px;font-size:.7rem;font-weight:700}
+.b-sale{background:var(--ac);color:#fff}
+.b-new{background:var(--ok);color:#fff}
+.b-hot{background:var(--p);color:#fff}
+.wish-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:var(--sur);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);box-shadow:var(--shd);transition:var(--tr)}
+.wish-btn:hover,.wish-btn.on{color:#e74c3c}
+.p-body{padding:.9rem}
+.p-brand{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.p-name{font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;color:var(--tx);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:.2rem 0}
+.p-price{font-weight:700;font-size:1rem;color:var(--p)}
+.p-compare{font-size:.8rem;color:var(--muted);text-decoration:line-through}
+.stars{color:#f1c40f;font-size:.78rem}
+.btn-cart{background:var(--p);color:#fff;border:none;border-radius:50px;padding:.42rem 1rem;font-size:.82rem;font-weight:600;width:100%;margin-top:.5rem;transition:var(--tr);cursor:pointer}
+.btn-cart:hover{background:var(--pd);transform:scale(1.02)}
+/* Buttons */
+.btn-pri{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:50px;padding:.6rem 1.75rem;font-weight:600;transition:var(--tr)}
+.btn-pri:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,62,244,.35);color:#fff}
+.btn-out{border:2px solid var(--p);color:var(--p);border-radius:50px;padding:.55rem 1.5rem;font-weight:600;background:transparent;transition:var(--tr);text-decoration:none;display:inline-block}
+.btn-out:hover{background:var(--p);color:#fff}
+/* Section */
+.sec-title{font-size:1.7rem;font-weight:800;position:relative;display:inline-block;margin-bottom:.2rem}
+.sec-title::after{content:'';position:absolute;bottom:-4px;left:0;width:40%;height:3px;background:linear-gradient(90deg,var(--p),var(--ac));border-radius:2px}
+/* Chatbot */
+#cb-btn{position:fixed;bottom:24px;right:24px;width:54px;height:54px;background:linear-gradient(135deg,var(--p),var(--ac));border:none;border-radius:50%;color:#fff;font-size:1.35rem;cursor:pointer;box-shadow:0 4px 20px rgba(108,62,244,.4);z-index:9998;display:flex;align-items:center;justify-content:center;transition:var(--tr)}
+#cb-btn:hover{transform:scale(1.1)}
+#cb-win{position:fixed;bottom:88px;right:24px;width:350px;max-height:500px;background:var(--sur);border:1px solid var(--bdr);border-radius:20px;box-shadow:0 12px 48px rgba(108,62,244,.2);z-index:9997;display:none;flex-direction:column}
+.cb-head{background:linear-gradient(135deg,var(--p),var(--ac));color:#fff;padding:.9rem 1rem;border-radius:20px 20px 0 0;display:flex;align-items:center;gap:.7rem}
+.cb-msgs{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.6rem;max-height:300px}
+.cb-msg{max-width:82%;padding:.55rem .85rem;border-radius:14px;font-size:.85rem;line-height:1.5}
+.cb-user{background:var(--p);color:#fff;align-self:flex-end;border-radius:14px 14px 4px 14px}
+.cb-bot{background:var(--bg);color:var(--tx);align-self:flex-start;border-radius:14px 14px 14px 4px}
+.cb-in{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--bdr)}
+.cb-in input{flex:1;border:1px solid var(--bdr);border-radius:50px;padding:.45rem .9rem;background:var(--bg);color:var(--tx);font-size:.85rem}
+.cb-in button{background:var(--p);color:#fff;border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+/* Order tracker */
+.steps{display:flex;justify-content:space-between;position:relative}
+.steps::before{content:'';position:absolute;top:19px;left:5%;right:5%;height:3px;background:var(--bdr);z-index:0}
+.step-fill{position:absolute;top:19px;left:5%;height:3px;background:linear-gradient(90deg,var(--p),var(--ac));z-index:1;transition:width 1s ease}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:2}
+.step-ico{width:38px;height:38px;border-radius:50%;background:var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.95rem}
+.step.done .step-ico{background:var(--ok);color:#fff}
+.step.cur .step-ico{background:var(--p);color:#fff;box-shadow:0 0 0 4px rgba(108,62,244,.2)}
+.step-lbl{font-size:.68rem;margin-top:.35rem;color:var(--muted);text-align:center}
+.step.done .step-lbl,.step.cur .step-lbl{color:var(--tx);font-weight:600}
+/* Toast */
+#toast-box{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:.5rem}
+.toast-msg{background:var(--sur);border:1px solid var(--bdr);border-left:4px solid var(--p);border-radius:12px;padding:.7rem 1rem;font-size:.85rem;box-shadow:var(--shd);animation:fadeInDown .3s ease;max-width:280px}
+.toast-msg.err{border-left-color:#e74c3c}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fiu{animation:fadeInUp .5s ease forwards}
+footer{background:var(--sur);border-top:1px solid var(--bdr);padding:2.5rem 0 1.5rem;margin-top:4rem}
+footer a{color:var(--muted);text-decoration:none;font-size:.88rem;transition:var(--tr)}
+footer a:hover{color:var(--p)}
+.fc{border-radius:8px;border:1px solid var(--bdr);background:var(--bg);color:var(--tx);padding:.5rem .75rem}
+@media(max-width:768px){#cb-win{width:calc(100vw - 48px)}.sec-title{font-size:1.3rem}}
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<div id="toast-box"></div>
+
+<nav class="nav-bar">
+<div class="container">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'store:index' %}" class="brand"><i class="bi bi-bag-heart-fill"></i> ShopAI</a>
+    <div class="search-wrap d-none d-md-block">
+      <input type="text" id="srch" placeholder="Search products, brands…">
+      <div class="suggestions" id="sug-box"></div>
+    </div>
+    <div class="d-flex align-items-center gap-1 ms-auto">
+      <button onclick="toggleDark()" style="border:none;background:var(--bg);padding:.3rem .5rem;border-radius:8px;color:var(--tx);font-size:1.1rem;cursor:pointer" title="Dark mode">
+        <i class="bi bi-{% if request.user.dark_mode %}sun{% else %}moon{% endif %}" id="dicon"></i>
+      </button>
+      {% if user.is_authenticated %}
+      <a href="{% url 'wishlist:view' %}" class="nav-btn"><i class="bi bi-heart"></i>{% if wishlist_count > 0 %}<span class="badge-c">{{ wishlist_count }}</span>{% endif %}</a>
+      <a href="{% url 'cart:view' %}" class="nav-btn"><i class="bi bi-bag"></i>{% if cart_count > 0 %}<span class="badge-c cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
+      <div class="dropdown">
+        <a class="nav-btn" data-bs-toggle="dropdown" href="#"><i class="bi bi-person-circle"></i></a>
+        <ul class="dropdown-menu dropdown-menu-end" style="border-radius:12px;border:1px solid var(--bdr);background:var(--sur);min-width:180px">
+          <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="{% url 'orders:order_list' %}"><i class="bi bi-box me-2"></i>My Orders</a></li>
+          {% if user.is_vendor %}<li><a class="dropdown-item" href="{% url 'vendor:dashboard' %}"><i class="bi bi-shop me-2"></i>Vendor Panel</a></li>{% endif %}
+          {% if user.is_staff %}<li><a class="dropdown-item" href="{% url 'analytics:dashboard' %}"><i class="bi bi-bar-chart me-2"></i>Analytics</a></li>{% endif %}
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      </div>
+      {% else %}
+      <a href="{% url 'users:login' %}" class="btn-out btn btn-sm">Login</a>
+      <a href="{% url 'users:register' %}" class="btn-pri btn btn-sm ms-1">Sign Up</a>
+      {% endif %}
+    </div>
+  </div>
+  <!-- Category strip -->
+  <div class="d-flex gap-3 mt-2 overflow-auto pb-1" style="scrollbar-width:none">
+    {% for cat in all_categories %}
+    <a href="{% url 'store:category' cat.slug %}" style="white-space:nowrap;font-size:.82rem;color:var(--muted);text-decoration:none;transition:var(--tr)" onmouseover="this.style.color='var(--p)'" onmouseout="this.style.color='var(--muted)'">{{ cat.name }}</a>
+    {% endfor %}
+    <a href="{% url 'store:trending' %}" style="white-space:nowrap;font-size:.82rem;color:var(--ac);text-decoration:none;font-weight:600">🔥 Trending</a>
+  </div>
+</div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+{% for m in messages %}
+<div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show" style="border-radius:12px;border:none"><i class="bi bi-{% if m.tags == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>{{ m }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+{% endfor %}
+</div>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+<div class="container">
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="brand fs-4"><i class="bi bi-bag-heart-fill"></i> ShopAI</div>
+    <p class="mt-2" style="font-size:.85rem;color:var(--muted)">AI-powered shopping. Smart recommendations, secure payments, real-time tracking.</p>
+  </div>
+  <div class="col-md-2"><h6 class="fw-bold mb-3">Shop</h6>
+    <div class="d-flex flex-column gap-2">
+      <a href="{% url 'store:product_list' %}">All Products</a>
+      <a href="{% url 'store:trending' %}">Trending</a>
+      <a href="{% url 'vendor:register' %}">Sell on ShopAI</a>
+    </div>
+  </div>
+  <div class="col-md-2"><h6 class="fw-bold mb-3">Account</h6>
+    <div class="d-flex flex-column gap-2">
+      {% if user.is_authenticated %}
+      <a href="{% url 'users:profile' %}">Profile</a>
+      <a href="{% url 'orders:order_list' %}">Orders</a>
+      <a href="{% url 'wishlist:view' %}">Wishlist</a>
+      {% else %}
+      <a href="{% url 'users:login' %}">Login</a>
+      <a href="{% url 'users:register' %}">Register</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-4"><h6 class="fw-bold mb-3">Contact</h6>
+    <p style="font-size:.85rem;color:var(--muted)"><i class="bi bi-envelope me-2"></i>support@shopai.com</p>
+    <p style="font-size:.85rem;color:var(--muted)"><i class="bi bi-phone me-2"></i>+91-1234567890</p>
+    <p style="font-size:.85rem;color:var(--muted)"><i class="bi bi-clock me-2"></i>Mon–Sat, 9AM–6PM IST</p>
+<!--    <a href="/api/v1/products/" style="font-size:.8rem;color:var(&#45;&#45;p)"><i class="bi bi-code-slash me-1"></i>REST API Docs</a>-->
+  </div>
+</div>
+<hr style="border-color:var(--bdr);margin-top:2rem">
+<p class="text-center" style="font-size:.8rem;color:var(--muted)">© 2024 ShopAI · Built with Django + AI · MCA Final Year Project</p>
+</div>
+</footer>
+
+<!-- Chatbot -->
+<button id="cb-btn" onclick="cbToggle()"><i class="bi bi-chat-dots-fill" id="cb-icon"></i></button>
+<div id="cb-win">
+  <div class="cb-head">
+    <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.1rem">🤖</div>
+    <div><div style="font-weight:700;font-size:.9rem">ShopAI Assistant</div><div style="font-size:.72rem;opacity:.85">● Online</div></div>
+    <button onclick="cbToggle()" style="margin-left:auto;background:none;border:none;color:#fff;font-size:1rem;cursor:pointer"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="cb-msgs" id="cb-msgs">
+    <div class="cb-msg cb-bot">👋 Hi! I'm ShopAI Assistant. Ask me about products, orders, shipping, returns, or payments!</div>
+  </div>
+  <div class="cb-in">
+    <input type="text" id="cb-inp" placeholder="Type a message…" onkeypress="if(event.key==='Enter')cbSend()">
+    <button onclick="cbSend()"><i class="bi bi-send-fill" style="font-size:.8rem"></i></button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Dark Mode
+function toggleDark(){
+  const h=document.documentElement,dark=h.dataset.theme==='dark';
+  h.dataset.theme=dark?'light':'dark';
+  document.getElementById('dicon').className=dark?'bi bi-moon':'bi bi-sun';
+  {% if user.is_authenticated %}fetch("{% url 'users:toggle_dark_mode' %}");{% endif %}
+}
+// Search
+const srch=document.getElementById('srch'),sbox=document.getElementById('sug-box');
+let stimer;
+if(srch){
+  srch.addEventListener('input',function(){
+    clearTimeout(stimer);
+    const q=this.value.trim();
+    if(q.length<2){sbox.style.display='none';return;}
+    stimer=setTimeout(()=>{
+      fetch('/search/suggestions/?q='+encodeURIComponent(q)).then(r=>r.json()).then(d=>{
+        let h='';
+        (d.categories||[]).forEach(c=>{h+=`<div class="sug-item" onclick="location='/category/${c.slug}/'"><i class="bi bi-tag" style="color:var(--muted)"></i><span>${c.name}</span><small style="margin-left:auto;color:var(--muted)">Category</small></div>`;});
+        (d.products||[]).forEach(p=>{h+=`<div class="sug-item" onclick="location='/product/${p.slug}/'"><i class="bi bi-search" style="color:var(--p)"></i><span>${p.name}</span><small style="margin-left:auto;color:var(--p);font-weight:700">₹${p.price}</small></div>`;});
+        sbox.innerHTML=h||'<div class="sug-item">No results</div>';
+        sbox.style.display='block';
+      });
+    },300);
+  });
+  document.addEventListener('click',e=>{if(!srch.contains(e.target))sbox.style.display='none';});
+}
+// Add to Cart
+function addToCart(pid,qty=1){
+  fetch('/cart/add/'+pid+'/',{method:'POST',headers:{'X-CSRFToken':csrfToken(),'X-Requested-With':'XMLHttpRequest','Content-Type':'application/x-www-form-urlencoded'},body:'quantity='+qty})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){
+      showToast(d.message||'Added to cart!');
+      document.querySelectorAll('.cart-count-badge').forEach(el=>el.textContent=d.cart_count);
+    }else showToast(d.message||'Error','err');
+  }).catch(()=>showToast('Please log in to add to cart','err'));
+}
+// Wishlist
+function toggleWish(pid,btn){
+  fetch('/wishlist/toggle/'+pid+'/',{method:'POST',headers:{'X-CSRFToken':csrfToken(),'X-Requested-With':'XMLHttpRequest'}})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){btn.classList.toggle('on',d.added);btn.querySelector('i').className='bi bi-heart'+(d.added?'-fill':'');}
+  }).catch(()=>showToast('Please log in','err'));
+}
+// Chatbot
+let cbHistory=[];
+function cbToggle(){
+  const w=document.getElementById('cb-win'),ic=document.getElementById('cb-icon');
+  const open=w.style.display==='flex';
+  w.style.display=open?'none':'flex';w.style.flexDirection='column';
+  ic.className=open?'bi bi-chat-dots-fill':'bi bi-x-lg';
+}
+function cbSend(){
+  const inp=document.getElementById('cb-inp'),msg=inp.value.trim();
+  if(!msg)return; inp.value='';
+  cbAppend(msg,'user'); cbHistory.push({role:'user',content:msg});
+  fetch('/chatbot/api/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken()},body:JSON.stringify({message:msg,history:cbHistory})})
+  .then(r=>r.json()).then(d=>{cbAppend(d.response||'Sorry, error.','bot');cbHistory.push({role:'assistant',content:d.response||''});})
+  .catch(()=>cbAppend('Connection error. Please try again.','bot'));
+}
+function cbAppend(text,type){
+  const m=document.getElementById('cb-msgs'),d=document.createElement('div');
+  d.className='cb-msg cb-'+type;
+  d.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  m.appendChild(d); m.scrollTop=m.scrollHeight;
+}
+// Toast
+function showToast(msg,type='ok'){
+  const b=document.getElementById('toast-box'),t=document.createElement('div');
+  t.className='toast-msg'+(type==='err'?' err':''); t.textContent=msg;
+  b.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+// CSRF
+function csrfToken(){const m=document.cookie.match(/csrftoken=([^;]+)/);return m?m[1]:'';}
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

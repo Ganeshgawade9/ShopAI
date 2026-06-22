@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Pay via Razorpay — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width:480px;text-align:center">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:2.3rem">
+<div style="font-size:3rem;margin-bottom:1rem">💳</div>
+<h3 style="font-weight:800">Pay ₹{{ order.total }}</h3>
+<p style="color:var(--muted)">Order #{{ order.order_number }}</p>
+<button id="rzpBtn" class="btn-pri btn mt-3 w-100">Pay with Razorpay</button>
+<a href="{% url 'orders:order_detail' order.pk %}" class="btn-out btn mt-2 w-100 text-center">Pay Later (COD)</a>
+</div>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzpBtn').onclick=function(){
+var options={key:"{{ RAZORPAY_KEY_ID }}",amount:"{{ rz_order.amount }}",currency:"INR",name:"ShopAI",description:"Order #{{ order.order_number }}",order_id:"{{ rz_order.id }}",
+handler:function(r){
+var f=document.createElement('form');f.method='POST';f.action='{% url "orders:razorpay_callback" %}';
+['razorpay_payment_id','razorpay_order_id','razorpay_signature'].forEach(function(k){var i=document.createElement('input');i.type='hidden';i.name=k;i.value=r[k];f.appendChild(i);});
+var c=document.createElement('input');c.type='hidden';c.name='csrfmiddlewaretoken';c.value='{{ csrf_token }}';f.appendChild(c);
+document.body.appendChild(f);f.submit();
+},theme:{color:"#6c3ef4"}};
+var rzp=new Razorpay(options);rzp.open();
+};
+</script>
+{% endblock %}

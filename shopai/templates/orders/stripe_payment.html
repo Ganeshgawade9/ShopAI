@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Pay via Stripe — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width:480px;text-align:center">
+<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:2.3rem">
+<div style="font-size:3rem;margin-bottom:1rem">🌐</div>
+<h3 style="font-weight:800">Pay ₹{{ order.total }}</h3>
+<p style="color:var(--muted)">Order #{{ order.order_number }}</p>
+<form method="POST">{% csrf_token %}<button type="submit" class="btn-pri btn mt-3 w-100">Pay with Stripe</button></form>
+</div>
+</div>
+{% endblock %}

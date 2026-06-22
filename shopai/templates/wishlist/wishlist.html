@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}My Wishlist — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<h2 class="mb-4">My Wishlist <span style="color:var(--muted);font-size:1rem">({{ wishlist.products.count }} items)</span></h2>
+{% if wishlist.products.all %}
+<div class="row row-cols-2 row-cols-md-4 g-3">
+{% for product in wishlist.products.all %}
+<div class="col">
+<div class="p-card">
+<div class="p-img"><a href="{{ product.get_absolute_url }}">{% if product.main_image %}<img src="{{ product.main_image.image.url }}">{% else %}<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2.5rem;background:var(--bg)">📦</div>{% endif %}</a></div>
+<div class="p-body">
+<div class="p-name">{{ product.name }}</div>
+<div class="p-price">₹{{ product.price }}</div>
+<div class="d-flex gap-2 mt-2">
+<a href="{% url 'wishlist:move_to_cart' product.id %}" class="btn-pri btn btn-sm flex-grow-1" style="font-size:.78rem;padding:.32rem">Move to Cart</a>
+<a href="{% url 'wishlist:toggle' product.id %}" style="color:#e74c3c;padding:.32rem"><i class="bi bi-trash"></i></a>
+</div>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:4rem 2rem">
+<div style="font-size:5rem;margin-bottom:1rem">💝</div><h4>Your wishlist is empty</h4>
+<a href="{% url 'store:product_list' %}" class="btn-pri btn mt-2">Discover Products</a>
+</div>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} — ShopAI{% endblock %}
+{% block content %}
+<div class="container mt-4">
+<h2 class="mb-1">{{ category.name }}</h2>
+{% if category.description %}<p style="color:var(--muted)">{{ category.description }}</p>{% endif %}
+<div class="row row-cols-2 row-cols-md-4 g-3 mt-2">
+{% for product in products %}{% include 'partials/product_card.html' %}{% endfor %}
+{% if not products %}<div class="col-12" style="text-align:center;padding:3rem;color:var(--muted)">No products in this category yet.</div>{% endif %}
+</div>
+{% if products.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center"><ul class="pagination">
+{% if products.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">‹</a></li>{% endif %}
+{% for num in products.paginator.page_range %}<li class="page-item {% if num == products.number %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+{% if products.has_next %}<li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">›</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+</div>
+{% endblock %}
